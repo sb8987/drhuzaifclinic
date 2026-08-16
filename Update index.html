@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f172a">
+
+<title>Slim Fit Obesity Clinic — Management System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#080d17;
+    --panel:rgba(18,28,45,.92);
+    --blue:#1e3a8a;
+    --cyan:#0284c7;
+    --gold:#d97706;
+    --gold2:#f59e0b;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+    background:linear-gradient(135deg,#070b13 0%,#172554 100%);
+    font-family:'Poppins',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+}
+.glass-card{
+    border-radius:20px;
+    background:var(--panel);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 15px 35px rgba(0,0,0,.45);
+}
+.doctor-profile-img{
+    width:62px;
+    height:62px;
+    object-fit:cover;
+    border-radius:50%;
+    border:2px solid var(--gold2);
+}
+.desktop-navbar{
+    background:rgba(15,23,42,.94);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;
+    padding:12px 18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.nav-pills .nav-link{
+    color:#94a3b8;
+    border-radius:10px;
+    font-weight:600;
+    padding:10px 16px;
+}
+.nav-pills .nav-link.active{
+    background:linear-gradient(135deg,#f59e0b,#d97706)!important;
+    color:#0f172a!important;
+}
+.form-control, .form-select{
+    background:#0f172a!important;
+    color:#fff!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    border-radius:11px;
+    padding:10px 13px;
+}
+.form-control:focus, .form-select:focus{
+    border-color:#f59e0b!important;
+    box-shadow:0 0 0 3px rgba(245,158,11,.18)!important;
+}
+.form-control::placeholder{color:#64748b!important;}
+.btn-custom-yellow{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+    color:#0f172a;
+    font-weight:700;
+    border:0;
+    border-radius:11px;
+}
+.suggestions-list{
+    position:absolute;
+    background:#1e293b;
+    border:1px solid #475569;
+    border-radius:10px;
+    width:100%;
+    max-height:160px;
+    overflow:auto;
+    z-index:2000;
+}
+.suggestion-item{
+    padding:9px 12px;
+    cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+.suggestion-item:hover{
+    background:#f59e0b;
+    color:#0f172a;
+}
+.history-box{max-height:420px; overflow:auto;}
+.stat-card{border-radius:16px; background:rgba(2,6,23,.45); padding:20px;}
+.small-muted{color:#94a3b8; font-size:.82rem;}
+.section-title{font-weight:800; color:#f59e0b;}
+#toastContainer{position:fixed; right:18px; bottom:18px; z-index:99999;}
+.app-badge{font-size:.72rem;}
+
+#dailyReportPrintSection{display:none;}
+
+/* Compact Printable Report */
+.daily-page{
+    width:210mm;
+    min-height:297mm;
+    padding:8mm 10mm;
+    background:#fff;
+    color:#111827;
+    font-family:'Poppins',sans-serif;
+    box-sizing:border-box;
+}
+.daily-header{
+    text-align:center;
+    border-bottom:2px solid #1e3a8a;
+    padding-bottom:5px;
+    margin-bottom:8px;
+}
+.daily-header h1{margin:0; color:#1e3a8a; font-size:18pt; font-weight:900; line-height:1.1;}
+.daily-header h2{margin:2px 0 0; color:#d97706; font-size:10pt; font-weight:700;}
+.daily-header p{margin:3px 0 0; font-size:8pt; color:#475569;}
+.daily-summary{display:flex; gap:8px; margin-top:8px; margin-bottom:10px;}
+.summary-box{flex:1; border:1px solid #cbd5e1; padding:5px; text-align:center; border-radius:5px; background:#f8fafc;}
+.summary-label{font-size:7.5pt; color:#64748b; font-weight:600;}
+.summary-value{font-size:11pt; font-weight:800; color:#1e3a8a;}
+.daily-table{width:100%; border-collapse:collapse; font-size:7.5pt;}
+.daily-table th{background:#1e3a8a; color:#fff; padding:4px 5px; border:1px solid #64748b; text-align:left; font-size:7.5pt;}
+.daily-table td{padding:3px 5px; border:1px solid #cbd5e1; line-height:1.2;}
+.daily-table tr:nth-child(even){background:#f8fafc;}
+.daily-footer{margin-top:15px; border-top:1.5px solid #1e3a8a; padding-top:5px; display:flex; justify-content:space-between; font-size:7.5pt; color:#475569;}
+
+@page{size:A4 portrait; margin:6mm;}
+
+@media print{
+    html, body{margin:0!important; padding:0!important; width:210mm!important; background:#fff!important;}
+    body{min-height:297mm!important; overflow:visible!important;}
+    body *{visibility:hidden!important;}
+
+    body.print-report #dailyReportPrintSection, body.print-report #dailyReportPrintSection *{visibility:visible!important;}
+    body.print-report #dailyReportPrintSection{
+        display:block!important; position:absolute!important; left:0!important; top:0!important;
+        width:210mm!important; background:#fff!important; overflow:visible!important;
+    }
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+}
+</style>
+</head>
+<body>
+
+<!-- Login Screen Overlay -->
+<div id="loginOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background:#080d17; z-index:999999;">
+    <div class="glass-card p-4 text-center" style="max-width:400px; width:90%;">
+        <img src="Huzaif.profile.jpg" class="doctor-profile-img mb-3" style="width:80px;height:80px;" alt="Logo" onerror="this.style.display='none'">
+        <h4 class="text-warning fw-bold mb-1">Slim Fit Clinic</h4>
+        <p class="small-muted mb-4">Please login to access system</p>
+        <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="mb-3 text-start">
+                <label class="form-label small fw-bold">Username</label>
+                <input type="text" id="loginUser" class="form-control" placeholder="Enter username" required>
+            </div>
+            <div class="mb-2 text-start">
+                <label class="form-label small fw-bold">Password</label>
+                <input type="password" id="loginPass" class="form-control" placeholder="Enter password" required>
+            </div>
+            <div class="text-end mb-3">
+                <a href="#" onclick="handleForgotPassword()" class="text-warning small text-decoration-none fw-semibold">
+                    <i class="fa-solid fa-key me-1"></i> Forgot Password?
+                </a>
+            </div>
+            <button type="submit" class="btn btn-custom-yellow w-100 fw-bold py-2">
+                <i class="fa-solid fa-right-to-bracket me-2"></i> Login System
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="container-fluid px-4 py-4 no-print d-none" id="mainAppContainer">
+    <div class="desktop-navbar d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <img src="Huzaif.profile.jpg" class="doctor-profile-img" alt="Dr. Huzaif" onerror="this.style.display='none'">
+            <div>
+                <h5 class="text-warning fw-bold mb-0">SLIM FIT Clinic</h5>
+                <small class="text-info fw-semibold">Dr. Huzaif Khan — Clinical Nutritionist</small>
+                <div class="small-muted">Folder Portable Database System</div>
+            </div>
+        </div>
+
+        <!-- System Date Selection Control -->
+        <div class="d-flex align-items-center gap-2 bg-dark bg-opacity-75 p-2 px-3 rounded-3 border border-secondary">
+            <i class="fa-solid fa-calendar-days text-warning fs-5"></i>
+            <div>
+                <label class="form-label mb-0 text-muted" style="font-size:10px; line-height:1; display:block;">SYSTEM WORKING DATE</label>
+                <input type="date" id="systemDateInput" class="form-control form-control-sm border-0 bg-transparent text-warning fw-bold p-0" onchange="manualDateChange(this.value)">
+            </div>
+        </div>
+
+        <ul class="nav nav-pills gap-1" id="mainAppNavPills">
+            <li class="nav-item"><button class="nav-link active" id="btn-tab-home" data-bs-toggle="pill" data-bs-target="#tab-home"><i class="fa-solid fa-house-medical me-1"></i> Main Entry</button></li>
+            <li class="nav-item"><button class="nav-link" id="btn-tab-dash" data-bs-toggle="pill" data-bs-target="#tab-dash"><i class="fa-solid fa-chart-line me-1"></i> Dashboard & Reports</button></li>
+            <li class="nav-item"><button class="nav-link" id="btn-tab-search" data-bs-toggle="pill" data-bs-target="#tab-search"><i class="fa-solid fa-magnifying-glass me-1"></i> Records</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-data"><i class="fa-solid fa-file-export me-1"></i> Data Transfer</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-security"><i class="fa-solid fa-lock me-1"></i> Security</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-about"><i class="fa-solid fa-circle-info me-1"></i> About</button></li>
+        </ul>
+        <div class="d-flex gap-2 align-items-center">
+            <button class="btn btn-outline-danger btn-sm fw-bold" onclick="logout()"><i class="fa-solid fa-power-off me-1"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <!-- Main Entry Tab -->
+        <div class="tab-pane fade show active" id="tab-home">
+            <div class="row g-4">
+                <div class="col-xl-5 col-lg-6">
+                    <div class="glass-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="section-title fs-5 mb-0"><i class="fa-solid fa-user-plus me-2"></i> Patient Appointment & Entry</h4>
+                            <span id="editModeBadge" class="badge bg-secondary app-badge d-none">EDIT MODE</span>
+                        </div>
+
+                        <!-- Quick Search Box for Patient Code or Phone -->
+                        <div class="mb-3 p-2 bg-dark bg-opacity-50 border border-secondary rounded-3">
+                            <label class="form-label small fw-bold text-info mb-1"><i class="fa-solid fa-search me-1"></i> Patient Code / Phone Lookup</label>
+                            <div class="input-group">
+                                <input type="text" id="quickLookupInput" class="form-control py-1" placeholder="Enter Patient Code (e.g. P-1001) or Phone..." onkeydown="if(event.key==='Enter')quickPatientLookup()">
+                                <button class="btn btn-sm btn-custom-yellow px-3" type="button" onclick="quickPatientLookup()">Lookup</button>
+                            </div>
+                        </div>
+
+                        <form id="clinicForm" autocomplete="off" onsubmit="event.preventDefault()">
+                            <input type="hidden" id="editVisitId">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-warning">Patient Code (Auto Assigned)</label>
+                                    <input id="patientCode" class="form-control fw-bold text-warning" readonly placeholder="Auto Generated">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold">Phone Number *</label>
+                                    <input id="phone" class="form-control" required inputmode="tel" maxlength="15" placeholder="03XXXXXXXXX" onblur="checkExistingPhone(this.value)">
+                                </div>
+                            </div>
+
+                            <div id="familyMembersAlert" class="alert alert-warning d-none p-3 mb-3 border border-warning text-dark" style="background:#fef3c7 !important;">
+                                <div class="fw-bold mb-2"><i class="fa-solid fa-users me-1"></i> Matching Patient Records:</div>
+                                <div id="familyMembersList" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button" class="btn btn-sm btn-dark fw-bold" onclick="addNewFamilyMember()">+ Add New Patient / Member</button>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 position-relative">
+                                <label class="form-label small fw-bold">Patient Name *</label>
+                                <input id="name" class="form-control" required placeholder="Enter patient name..." oninput="showSuggestions('name',nameSuggestions,'nameSuggestionsBox')">
+                                <div id="nameSuggestionsBox" class="suggestions-list d-none"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3 position-relative">
+                                    <label class="form-label small fw-bold">Age</label>
+                                    <input id="age" class="form-control" placeholder="e.g. 25 Years" oninput="showSuggestions('age',ageSuggestions,'ageSuggestionsBox')">
+                                    <div id="ageSuggestionsBox" class="suggestions-list d-none"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold">Gender</label>
+                                    <select id="gender" class="form-select">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <hr class="border-secondary">
+                            <h6 class="text-warning fw-bold mb-3"><i class="fa-solid fa-stethoscope me-2"></i> Vitals & Measurements</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3 position-relative">
+                                    <label class="form-label small fw-bold">Height</label>
+                                    <input id="height" class="form-control" placeholder="e.g. 5.8 ft" oninput="showSuggestions('height',heightSuggestions,'heightSuggestionsBox')">
+                                    <div id="heightSuggestionsBox" class="suggestions-list d-none"></div>
+                                </div>
+                                <div class="col-md-6 mb-3 position-relative">
+                                    <label class="form-label small fw-bold">Weight (KG)</label>
+                                    <input id="weight" class="form-control" placeholder="e.g. 75 kg" oninput="showSuggestions('weight',weightSuggestions,'weightSuggestionsBox')">
+                                    <div id="weightSuggestionsBox" class="suggestions-list d-none"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3 position-relative">
+                                    <label class="form-label small fw-bold">Blood Pressure (BP)</label>
+                                    <input id="bp" class="form-control" placeholder="e.g. 120/80" oninput="showSuggestions('bp',bpSuggestions,'bpSuggestionsBox')">
+                                    <div id="bpSuggestionsBox" class="suggestions-list d-none"></div>
+                                </div>
+                                <div class="col-md-6 mb-3 position-relative">
+                                    <label class="form-label small fw-bold">Sugar Level</label>
+                                    <input id="sugarFasting" class="form-control" placeholder="e.g. 110 mg/dL" oninput="showSuggestions('sugarFasting',sugarSuggestions,'sugarSuggestionsBox')">
+                                    <div id="sugarSuggestionsBox" class="suggestions-list d-none"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold">Consultation Fees (Rs)</label>
+                                <input type="number" min="0" id="fees" class="form-control" placeholder="0">
+                            </div>
+                            <div class="mb-2">
+                                <button class="btn btn-success w-100 py-2 fw-bold" type="button" onclick="saveRecordOnly()">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> <span id="saveBtnText">Save Appointment Record</span>
+                                </button>
+                            </div>
+                            <button class="btn btn-outline-light w-100 rounded-pill" type="button" onclick="resetForm()">Clear Form</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-xl-7 col-lg-6">
+                    <div class="glass-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="section-title fs-5 mb-0"><i class="fa-solid fa-list-check me-2"></i> Entries For Selected Date</h4>
+                            <span id="todayBadgeCount" class="badge bg-warning text-dark">0 Entries</span>
+                        </div>
+                        <div class="history-box border border-secondary border-opacity-25 rounded-3 p-2 bg-dark bg-opacity-50">
+                            <table class="table table-dark table-hover align-middle mb-0">
+                                <thead>
+                                    <tr class="text-warning">
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Weight</th>
+                                        <th>Fees</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="todayTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard & Reports Tab -->
+        <div class="tab-pane fade" id="tab-dash">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                    <div>
+                        <h4 class="section-title"><i class="fa-solid fa-chart-pie me-2"></i> Dashboard & Complete Monthly Reports</h4>
+                        <div class="small-muted">View records by duration with View Profile and New Appointment options</div>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <select id="reportPeriodSelect" class="form-select w-auto" onchange="updateDashboardView()">
+                            <option value="daily">Selected Date Report</option>
+                            <option value="weekly">Weekly Report (Last 7 Days)</option>
+                            <option value="monthly" selected>Monthly Report (This Month)</option>
+                        </select>
+                        <button class="btn btn-custom-yellow fw-bold" onclick="printFilteredReportPDF()">
+                            <i class="fa-solid fa-print me-2"></i> Print Report PDF
+                        </button>
+                        <button class="btn btn-outline-danger fw-bold" onclick="clearMonthlyData()">
+                            <i class="fa-solid fa-trash-can me-1"></i> Clear Month Data
+                        </button>
+                    </div>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-success border-4">
+                            <div class="small-muted" id="statPatientsLabel">PATIENTS</div>
+                            <h2 id="dashPatientCount" class="text-success fw-bold mb-0">0</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-info border-4">
+                            <div class="small-muted" id="statRevenueLabel">REVENUE</div>
+                            <h2 id="dashRevenue" class="text-info fw-bold mb-0">Rs. 0</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card border-start border-warning border-4">
+                            <div class="small-muted">AVERAGE FEE</div>
+                            <h2 id="dashAvgIncome" class="text-warning fw-bold mb-0">Rs. 0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complete Patients List Table with View Profile & New Appointment Options -->
+                <div class="p-3 bg-dark bg-opacity-50 border border-secondary rounded-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="text-warning fw-bold mb-0"><i class="fa-solid fa-users-rectangle me-2"></i> Patient Monthly List & Options</h5>
+                        <span id="dashTableBadge" class="badge bg-info text-dark">0 Patient Records</span>
+                    </div>
+                    <div class="history-box border border-secondary border-opacity-25 rounded-3 p-2">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="text-warning">
+                                    <th>Date</th>
+                                    <th>Patient Code</th>
+                                    <th>Patient Name</th>
+                                    <th>Phone</th>
+                                    <th>BP / Sugar</th>
+                                    <th>Fees</th>
+                                    <th class="text-end">Patient Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashMonthlyTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary">
+                    <strong class="text-warning">Database status:</strong> <span id="dbStatus">Checking...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div class="tab-pane fade" id="tab-search">
+            <div class="glass-card p-4">
+                <h4 class="section-title fs-5"><i class="fa-solid fa-magnifying-glass me-2"></i> Patient Code & Record Lookup</h4>
+                <p class="small-muted">Enter Patient Code (e.g. P-1001), Phone number, or Name to load full profile.</p>
+                <div class="input-group mb-4">
+                    <input id="globalSearchInput" class="form-control py-3" placeholder="Enter Patient Code, Phone number, or Name..." onkeydown="if(event.key==='Enter')executeGlobalSearch()">
+                    <button class="btn btn-custom-yellow px-4 fw-bold" onclick="executeGlobalSearch()">Search Patient</button>
+                </div>
+                <div id="globalSearchResultContainer" class="d-none">
+                    <div id="patientDetailsBox" class="alert alert-dark border border-success text-light d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"></div>
+                    <div class="history-box border border-secondary rounded-3 p-2 mb-3">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr class="text-info">
+                                    <th>Date</th>
+                                    <th>Code</th>
+                                    <th>Height / Weight</th>
+                                    <th>BP</th>
+                                    <th>Sugar</th>
+                                    <th>Fees</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="globalHistoryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="globalSearchPlaceholder" class="text-center py-5 text-secondary">
+                    <i class="fa-solid fa-address-book fs-1 mb-3"></i>
+                    <p>Search a patient code or phone to view full profile history.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Transfer Tab -->
+        <div class="tab-pane fade" id="tab-data">
+            <div class="glass-card p-4">
+                <h4 class="section-title"><i class="fa-solid fa-folder-open me-2"></i> Folder & Laptop Data Backup</h4>
+                <p class="small-muted">اپنا سارا ڈیٹا ایک کلک میں ڈاؤن لوڈ کریں۔ بس اس فائل کو اپنے فولڈر میں رکھیں، لیپ ٹاپ بدلنے پر پورا فولڈر دوسرے لیپ ٹاپ میں لے جائیں!</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <button class="btn btn-success fw-bold px-4 py-2" onclick="downloadFullDatabase()">
+                        <i class="fa-solid fa-download me-2"></i> Download Full Database File
+                    </button>
+                    <label class="btn btn-info fw-bold text-dark px-4 py-2 mb-0" style="cursor:pointer;">
+                        <i class="fa-solid fa-upload me-2"></i> Upload Database File
+                        <input type="file" accept=".json" hidden onchange="uploadFullDatabase(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Credentials Settings Tab -->
+        <div class="tab-pane fade" id="tab-security">
+            <div class="glass-card p-4" style="max-width:550px; margin: 0 auto;">
+                <h4 class="section-title fs-5 mb-3"><i class="fa-solid fa-key me-2"></i> System Credentials Settings</h4>
+                <p class="small-muted mb-4">اپنا لاگ ان یوزر نیم اور پاسورڈ یہاں سے تبدیل کریں۔</p>
+                
+                <form onsubmit="event.preventDefault(); updateCredentials();">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Current Password *</label>
+                        <input type="password" id="currPass" class="form-control" placeholder="Enter current password" required>
+                    </div>
+                    <hr class="border-secondary my-3">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">New Username *</label>
+                        <input type="text" id="newUsername" class="form-control" placeholder="Enter new username" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">New Password *</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Enter new password" required>
+                    </div>
+                    <button type="submit" class="btn btn-custom-yellow w-100 fw-bold py-2">
+                        <i class="fa-solid fa-floppy-disk me-2"></i> Update Credentials
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- About Tab -->
+        <div class="tab-pane fade" id="tab-about">
+            <div class="glass-card p-5 text-center">
+                <img src="Huzaif.profile.jpg" class="doctor-profile-img mb-3" style="width:100px;height:100px" alt="Doctor" onerror="this.style.display='none'">
+                <h3 class="text-warning fw-bold">Slim Fit Obesity Clinic</h3>
+                <p class="text-info fw-semibold">Dr. Huzaif Khan — Clinical Nutritionist</p>
+                <p class="small-muted">Clinic Helpline: 0332-9600660</p>
+                <p class="small-muted mb-0">Waziristan Plaza Main G.T Road Near CEENA School Opp College Stop Pabbi</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Patient Profile & History Modal -->
+<div class="modal fade" id="patientProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark text-light border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-warning fw-bold"><i class="fa-solid fa-address-card me-2"></i> Complete Patient Profile & History</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalProfileBody">
+                <!-- Dynamic Content -->
+            </div>
+            <div class="modal-footer border-secondary justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <div class="d-flex gap-2" id="modalActionButtons">
+                    <!-- Dynamic Buttons -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Printable Report Template -->
+<div id="dailyReportPrintSection">
+    <div class="daily-page">
+        <div class="daily-header">
+            <h1>SLIM FIT OBESITY CLINIC</h1>
+            <h2 id="reportPrintTitle">PATIENT APPOINTMENTS & REVENUE REPORT</h2>
+            <p>Generated Date / Period: <strong id="reportPrintDate">—</strong></p>
+        </div>
+        <div class="daily-summary">
+            <div class="summary-box">
+                <div class="summary-label">TOTAL PATIENTS</div>
+                <div class="summary-value" id="reportTotalPatients">0</div>
+            </div>
+            <div class="summary-box">
+                <div class="summary-label">TOTAL REVENUE</div>
+                <div class="summary-value">Rs. <span id="reportTotalRevenue">0</span></div>
+            </div>
+            <div class="summary-box">
+                <div class="summary-label">AVERAGE FEE</div>
+                <div class="summary-value">Rs. <span id="reportAverageFee">0</span></div>
+            </div>
+        </div>
+        <table class="daily-table">
+            <thead>
+                <tr>
+                    <th style="width:5%">#</th>
+                    <th style="width:12%">Date</th>
+                    <th style="width:11%">Code</th>
+                    <th style="width:23%">Patient Name</th>
+                    <th style="width:16%">Phone</th>
+                    <th style="width:9%">Weight</th>
+                    <th style="width:14%">BP / Sugar</th>
+                    <th style="width:10%">Fees</th>
+                </tr>
+            </thead>
+            <tbody id="dailyReportTableBody"></tbody>
+        </table>
+        <div class="daily-footer">
+            <div>Slim Fit Obesity Clinic — Pabbi</div>
+            <div>Dr. Huzaif Khan</div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const SECURITY_MASTER_KEY = "8987";
+let isManualDateSet = false;
+
+const nameSuggestions=["Ali Khan", "Muhammad Umar", "Ahmed Bilal", "Usman Ali", "Ayesha Bibi", "Fatima Noor", "Zainab Bibi", "Bilal Ahmed"];
+const ageSuggestions=["18 Years", "20 Years", "25 Years", "30 Years", "35 Years", "40 Years", "45 Years", "50 Years"];
+const heightSuggestions=["5.2 ft", "5.4 ft", "5.6 ft", "5.8 ft", "6.0 ft", "6.2 ft"];
+const weightSuggestions=["60 kg", "65 kg", "70 kg", "75 kg", "80 kg", "85 kg", "90 kg", "100 kg"];
+const bpSuggestions=["120/80 mmHg", "130/85 mmHg", "140/90 mmHg", "110/70 mmHg"];
+const sugarSuggestions=["90 mg/dL (Fasting)", "110 mg/dL (Fasting)", "140 mg/dL (PP)", "160 mg/dL (PP)"];
+
+const DB_NAME="slimfit_clinic_database";
+const DB_VERSION=1;
+const STORE_PATIENTS="patients";
+const STORE_VISITS="visits";
+
+let dbConn=null;
+
+// Security Credentials Setup
+if(!localStorage.getItem("slimfit_user")){
+    localStorage.setItem("slimfit_user", "admin");
+    localStorage.setItem("slimfit_pass", "1234");
+}
+
+function handleLogin(){
+    const u = document.getElementById("loginUser").value.trim();
+    const p = document.getElementById("loginPass").value.trim();
+    const savedU = localStorage.getItem("slimfit_user");
+    const savedP = localStorage.getItem("slimfit_pass");
+
+    if(u === savedU && p === savedP){
+        document.getElementById("loginOverlay").classList.add("d-none");
+        document.getElementById("mainAppContainer").classList.remove("d-none");
+        showToast("Welcome! Logged in successfully.");
+        initDateSystem();
+        initDB();
+    } else {
+        showToast("Incorrect Username or Password!", "error");
+    }
+}
+
+function handleForgotPassword(){
+    const secKey = prompt("Security Key:");
+    if(secKey === SECURITY_MASTER_KEY){
+        const newP = prompt("Enter new password:");
+        if(newP && newP.trim() !== ""){
+            localStorage.setItem("slimfit_pass", newP.trim());
+            showToast("Password updated successfully!");
+        } else {
+            showToast("Invalid Password!", "error");
+        }
+    } else if(secKey !== null) {
+        showToast("Incorrect Security Key!", "error");
+    }
+}
+
+function logout(){
+    document.getElementById("loginOverlay").classList.remove("d-none");
+    document.getElementById("mainAppContainer").classList.add("d-none");
+    document.getElementById("loginPass").value = "";
+    showToast("Logged out successfully.");
+}
+
+function initDateSystem(){
+    const dateInput = document.getElementById("systemDateInput");
+    const today = new Date().toISOString().split('T')[0];
+    if(!dateInput.value) {
+        dateInput.value = today;
+    }
+
+    setInterval(() => {
+        const currentRealDate = new Date().toISOString().split('T')[0];
+        if(!isManualDateSet && dateInput.value !== currentRealDate){
+            dateInput.value = currentRealDate;
+            loadTodayEntries();
+            updateDashboardView();
+        }
+    }, 30000);
+}
+
+function manualDateChange(val){
+    isManualDateSet = true;
+    showToast(`Date changed to ${val}`);
+    loadTodayEntries();
+    updateDashboardView();
+}
+
+function updateCredentials(){
+    const curr = document.getElementById("currPass").value.trim();
+    const savedP = localStorage.getItem("slimfit_pass");
+    if(curr !== savedP){
+        showToast("Current password does not match!", "error");
+        return;
+    }
+    const newU = document.getElementById("newUsername").value.trim();
+    const newP = document.getElementById("newPassword").value.trim();
+    
+    if(newU && newP){
+        localStorage.setItem("slimfit_user", newU);
+        localStorage.setItem("slimfit_pass", newP);
+        showToast("Username and Password updated successfully!");
+        document.getElementById("currPass").value = "";
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+    } else {
+        showToast("Please fill all security fields!", "error");
+    }
+}
+
+function showToast(msg, type="success"){
+    const container=document.getElementById("toastContainer");
+    const id="toast_"+Date.now();
+    const bg=type==="success"?"bg-success":"bg-danger";
+    container.innerHTML+=`
+        <div id="${id}" class="toast align-items-center text-white ${bg} border-0 show mb-2" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">${msg}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>`;
+    setTimeout(()=>{
+        const el=document.getElementById(id);
+        if(el) el.remove();
+    }, 3000);
+}
+
+function initDB(){
+    return new Promise((resolve, reject)=>{
+        const request=indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror=()=>reject(request.error);
+        request.onsuccess=()=>{
+            dbConn=request.result;
+            document.getElementById("dbStatus").innerText="Connected (Local Storage Folder Ready)";
+            document.getElementById("dbStatus").className="text-success fw-bold";
+            generateAutoPatientCode();
+            loadTodayEntries();
+            updateDashboardView();
+            resolve(dbConn);
+        };
+        request.onupgradeneeded=(e)=>{
+            const db=e.target.result;
+            if(!db.objectStoreNames.contains(STORE_PATIENTS)){
+                db.createObjectStore(STORE_PATIENTS, {keyPath:"id", autoIncrement:true});
+            }
+            if(!db.objectStoreNames.contains(STORE_VISITS)){
+                const store=db.createObjectStore(STORE_VISITS, {keyPath:"id", autoIncrement:true});
+                store.createIndex("phone", "phone", {unique:false});
+                store.createIndex("date", "date", {unique:false});
+                store.createIndex("code", "code", {unique:false});
+            }
+        };
+    });
+}
+
+function generateAutoPatientCode(){
+    if(!dbConn) return;
+    const tx = dbConn.transaction(STORE_VISITS, "readonly");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+
+    req.onsuccess = () => {
+        const visits = req.result || [];
+        if(document.getElementById("patientCode").value) return; // don't override if set
+
+        let maxCodeNum = 1000;
+        visits.forEach(v => {
+            if(v.code && v.code.startsWith("P-")){
+                const num = parseInt(v.code.replace("P-", ""));
+                if(!isNaN(num) && num > maxCodeNum){
+                    maxCodeNum = num;
+                }
+            }
+        });
+        document.getElementById("patientCode").value = "P-" + (maxCodeNum + 1);
+    };
+}
+
+function quickPatientLookup(){
+    const query = document.getElementById("quickLookupInput").value.trim();
+    if(!query) return;
+    checkExistingPhone(query);
+}
+
+async function checkExistingPhone(queryVal){
+    if(!queryVal || queryVal.length < 2) return;
+    const tx = dbConn.transaction(STORE_VISITS, "readonly");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+
+    req.onsuccess = () => {
+        const allVisits = req.result || [];
+        const matchedMap = new Map();
+
+        allVisits.forEach(v => {
+            const codeStr = (v.code || '').toString().toLowerCase();
+            const phoneStr = (v.phone || '').toString().toLowerCase();
+            const searchVal = queryVal.toLowerCase();
+
+            if(codeStr === searchVal || phoneStr.includes(searchVal)) {
+                matchedMap.set(v.code || v.name, v);
+            }
+        });
+
+        const alertBox = document.getElementById("familyMembersAlert");
+        const listDiv = document.getElementById("familyMembersList");
+        
+        if(matchedMap.size > 0){
+            listDiv.innerHTML = "";
+            matchedMap.forEach((patient) => {
+                const codeText = patient.code ? `${patient.code}` : 'No Code';
+                listDiv.innerHTML += `
+                    <div class="bg-white p-2 rounded border border-warning d-flex align-items-center justify-content-between gap-2 shadow-sm" style="min-width:210px;">
+                        <div>
+                            <span class="badge bg-warning text-dark mb-1">${codeText}</span>
+                            <strong class="text-dark d-block">${patient.name}</strong>
+                            <small class="text-muted" style="font-size:11px;">${patient.phone} | ${patient.age || '—'}</small>
+                        </div>
+                        <div class="d-flex flex-column gap-1">
+                            <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-bold py-0 px-2" onclick="viewPatientProfileByCode('${patient.code}')">
+                                Profile
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success fw-bold py-0 px-2" onclick="quickNewAppointment('${patient.code}', '${patient.name}', '${patient.phone}', '${patient.age}', '${patient.gender}')">
+                                + Appt
+                            </button>
+                        </div>
+                    </div>`;
+            });
+            alertBox.classList.remove("d-none");
+        } else {
+            alertBox.classList.add("d-none");
+            if(document.getElementById("quickLookupInput").value.trim()){
+                showToast("No patient found with this Code/Phone!", "error");
+            }
+        }
+    };
+}
+
+function quickNewAppointment(code, name, phone, age, gender){
+    document.getElementById("btn-tab-home").click();
+    document.getElementById("patientCode").value = code;
+    document.getElementById("name").value = name;
+    document.getElementById("phone").value = phone;
+    document.getElementById("age").value = age !== 'undefined' ? age : '';
+    document.getElementById("gender").value = gender !== 'undefined' ? gender : '';
+    
+    document.getElementById("height").value = "";
+    document.getElementById("weight").value = "";
+    document.getElementById("bp").value = "";
+    document.getElementById("sugarFasting").value = "";
+    document.getElementById("fees").value = "";
+    document.getElementById("editVisitId").value = "";
+
+    document.getElementById("familyMembersAlert").classList.add("d-none");
+    document.getElementById("editModeBadge").classList.add("d-none");
+    document.getElementById("saveBtnText").innerText = "Save New Appointment";
+
+    // Close Modal if open
+    const modalEl = document.getElementById("patientProfileModal");
+    const modalObj = bootstrap.Modal.getInstance(modalEl);
+    if(modalObj) modalObj.hide();
+
+    showToast(`New appointment setup loaded for ${name} (${code})`);
+    window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function addNewFamilyMember(){
+    document.getElementById("name").value = "";
+    document.getElementById("patientCode").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("gender").value = "";
+    document.getElementById("familyMembersAlert").classList.add("d-none");
+    generateAutoPatientCode();
+    showToast("Ready for new patient registration!");
+}
+
+function showSuggestions(inputId, list, boxId){
+    const input=document.getElementById(inputId);
+    const box=document.getElementById(boxId);
+    const val=input.value.toLowerCase();
+    if(!val){
+        box.classList.add("d-none");
+        return;
+    }
+    const filtered=list.filter(item=>item.toLowerCase().includes(val));
+    if(filtered.length===0){
+        box.classList.add("d-none");
+        return;
+    }
+    box.innerHTML=filtered.map(i=>`<div class="suggestion-item" onclick="selectSuggestion('${inputId}','${i}','${boxId}')">${i}</div>`).join("");
+    box.classList.remove("d-none");
+}
+
+function selectSuggestion(inputId, val, boxId){
+    document.getElementById(inputId).value=val;
+    document.getElementById(boxId).classList.add("d-none");
+}
+
+document.addEventListener("click", (e)=>{
+    if(!e.target.closest("input")){
+        document.querySelectorAll(".suggestions-list").forEach(b=>b.classList.add("d-none"));
+    }
+});
+
+function resetForm(){
+    document.getElementById("clinicForm").reset();
+    document.getElementById("editVisitId").value="";
+    document.getElementById("patientCode").value="";
+    document.getElementById("quickLookupInput").value="";
+    document.getElementById("editModeBadge").classList.add("d-none");
+    document.getElementById("saveBtnText").innerText="Save Appointment Record";
+    document.getElementById("familyMembersAlert").classList.add("d-none");
+    generateAutoPatientCode();
+}
+
+function collectFormData(){
+    let existingCode = document.getElementById("patientCode").value.trim();
+    if(!existingCode) {
+        existingCode = "P-" + Math.floor(1000 + Math.random() * 9000);
+    }
+
+    const setDate = document.getElementById("systemDateInput").value || new Date().toISOString().split("T")[0];
+
+    return {
+        code: existingCode,
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        age: document.getElementById("age").value.trim(),
+        gender: document.getElementById("gender").value,
+        height: document.getElementById("height").value.trim(),
+        weight: document.getElementById("weight").value.trim(),
+        bp: document.getElementById("bp").value.trim(),
+        sugarFasting: document.getElementById("sugarFasting").value.trim(),
+        fees: parseFloat(document.getElementById("fees").value)||0,
+        date: setDate,
+        timestamp: Date.now()
+    };
+}
+
+async function saveRecordOnly(){
+    const data=collectFormData();
+    if(!data.name || !data.phone){
+        showToast("Please enter Patient Name and Phone Number!", "error");
+        return;
+    }
+    const editId=document.getElementById("editVisitId").value;
+    const tx=dbConn.transaction(STORE_VISITS, "readwrite");
+    const store=tx.objectStore(STORE_VISITS);
+
+    if(editId){
+        data.id=parseInt(editId);
+        store.put(data);
+    } else {
+        store.add(data);
+    }
+
+    tx.oncomplete=()=>{
+        showToast(`Appointment saved! Code: ${data.code}`);
+        resetForm();
+        loadTodayEntries();
+        updateDashboardView();
+    };
+    tx.onerror=()=>showToast("Error saving record", "error");
+}
+
+function loadTodayEntries(){
+    if(!dbConn) return;
+    const selectedDate = document.getElementById("systemDateInput").value || new Date().toISOString().split("T")[0];
+    const tx=dbConn.transaction(STORE_VISITS, "readonly");
+    const store=tx.objectStore(STORE_VISITS);
+    const index=store.index("date");
+    const request=index.getAll(selectedDate);
+
+    request.onsuccess=()=>{
+        const visits=request.result || [];
+        const tbody=document.getElementById("todayTableBody");
+        tbody.innerHTML="";
+        visits.forEach((v)=>{
+            tbody.innerHTML+=`
+                <tr>
+                    <td><span class="badge bg-warning text-dark fw-bold">${v.code||'—'}</span></td>
+                    <td>${v.name}</td>
+                    <td>${v.phone}</td>
+                    <td>${v.weight||"—"}</td>
+                    <td>Rs. ${v.fees}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-info me-1" onclick="editVisit(${v.id})"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteVisit(${v.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+        document.getElementById("todayBadgeCount").innerText=`${visits.length} Entries`;
+    };
+}
+
+function getFilteredVisits(period, callback){
+    if(!dbConn) return;
+    const tx = dbConn.transaction(STORE_VISITS, "readonly");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+
+    req.onsuccess = () => {
+        const allVisits = req.result || [];
+        const selectedDateStr = document.getElementById("systemDateInput").value || new Date().toISOString().split("T")[0];
+        const selectedDateObj = new Date(selectedDateStr);
+
+        let filtered = [];
+
+        if(period === "daily"){
+            filtered = allVisits.filter(v => v.date === selectedDateStr);
+        } else if(period === "weekly"){
+            const sevenDaysAgo = new Date(selectedDateObj);
+            sevenDaysAgo.setDate(selectedDateObj.getDate() - 7);
+            filtered = allVisits.filter(v => new Date(v.date) >= sevenDaysAgo && new Date(v.date) <= selectedDateObj);
+        } else if(period === "monthly"){
+            const currentMonth = selectedDateStr.substring(0, 7);
+            filtered = allVisits.filter(v => v.date && v.date.startsWith(currentMonth));
+        }
+        callback(filtered);
+    };
+}
+
+function updateDashboardView(){
+    const period = document.getElementById("reportPeriodSelect").value;
+    
+    const labelMap = {
+        daily: "SELECTED DATE'S",
+        weekly: "THIS WEEK'S",
+        monthly: "THIS MONTH'S"
+    };
+
+    document.getElementById("statPatientsLabel").innerText = `${labelMap[period]} PATIENTS`;
+    document.getElementById("statRevenueLabel").innerText = `${labelMap[period]} REVENUE`;
+
+    getFilteredVisits(period, (visits) => {
+        let totalRev = 0;
+        visits.forEach(v => totalRev += v.fees);
+
+        document.getElementById("dashPatientCount").innerText = visits.length;
+        document.getElementById("dashRevenue").innerText = `Rs. ${totalRev}`;
+        document.getElementById("dashAvgIncome").innerText = visits.length > 0 ? `Rs. ${Math.round(totalRev / visits.length)}` : "Rs. 0";
+
+        // Render Monthly/Filtered Table with View Profile & New Appointment Actions
+        const tableBody = document.getElementById("dashMonthlyTableBody");
+        const tableBadge = document.getElementById("dashTableBadge");
+        tableBody.innerHTML = "";
+        tableBadge.innerText = `${visits.length} Patient Records`;
+
+        if(visits.length === 0){
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No records found for this duration.</td></tr>`;
+            return;
+        }
+
+        visits.reverse().forEach(v => {
+            tableBody.innerHTML += `
+                <tr>
+                    <td><small class="text-info font-monospace">${v.date||'—'}</small></td>
+                    <td><span class="badge bg-warning text-dark fw-bold">${v.code||'—'}</span></td>
+                    <td><strong>${v.name}</strong></td>
+                    <td>${v.phone}</td>
+                    <td>${v.bp||'—'} / ${v.sugarFasting||'—'}</td>
+                    <td class="text-warning fw-bold">Rs. ${v.fees}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-warning fw-bold me-1" onclick="viewPatientProfileByCode('${v.code}')">
+                            <i class="fa-solid fa-address-card me-1"></i> View Profile
+                        </button>
+                        <button class="btn btn-sm btn-success fw-bold" onclick="quickNewAppointment('${v.code}', '${v.name}', '${v.phone}', '${v.age}', '${v.gender}')">
+                            <i class="fa-solid fa-calendar-plus me-1"></i> New Appt
+                        </button>
+                    </td>
+                </tr>`;
+        });
+    });
+}
+
+function viewPatientProfileByCode(patientCode){
+    if(!dbConn || !patientCode) return;
+    const tx = dbConn.transaction(STORE_VISITS, "readonly");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+
+    req.onsuccess = () => {
+        const allVisits = req.result || [];
+        const patientVisits = allVisits.filter(v => v.code === patientCode);
+
+        if(patientVisits.length === 0) {
+            showToast("Profile not found!", "error");
+            return;
+        }
+
+        const latest = patientVisits[patientVisits.length - 1];
+
+        const profileBody = document.getElementById("modalProfileBody");
+        let visitsHistoryRows = '';
+
+        patientVisits.reverse().forEach((v, idx) => {
+            visitsHistoryRows += `
+                <tr>
+                    <td>${v.date}</td>
+                    <td>${v.height||'—'} / ${v.weight||'—'}</td>
+                    <td>${v.bp||'—'}</td>
+                    <td>${v.sugarFasting||'—'}</td>
+                    <td class="text-warning fw-bold">Rs. ${v.fees}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-info" onclick="triggerModalEdit(${v.id})">
+                            <i class="fa-solid fa-pen"></i> Edit
+                        </button>
+                    </td>
+                </tr>`;
+        });
+
+        profileBody.innerHTML = `
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <div class="p-3 bg-secondary bg-opacity-25 rounded border border-secondary">
+                        <h6 class="text-warning fw-bold mb-2"><i class="fa-solid fa-user-circle me-2"></i> Patient Information</h6>
+                        <p class="mb-1"><strong>Patient Code:</strong> <span class="badge bg-warning text-dark fs-6">${latest.code||'—'}</span></p>
+                        <p class="mb-1"><strong>Patient Name:</strong> ${latest.name}</p>
+                        <p class="mb-1"><strong>Phone:</strong> ${latest.phone}</p>
+                        <p class="mb-1"><strong>Age:</strong> ${latest.age||'—'}</p>
+                        <p class="mb-0"><strong>Gender:</strong> ${latest.gender||'—'}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-secondary bg-opacity-25 rounded border border-secondary">
+                        <h6 class="text-info fw-bold mb-2"><i class="fa-solid fa-chart-line me-2"></i> Visit Statistics</h6>
+                        <p class="mb-1"><strong>Total Appointments:</strong> <span class="badge bg-info text-dark">${patientVisits.length} Visits</span></p>
+                        <p class="mb-1"><strong>Latest Visit Date:</strong> ${latest.date}</p>
+                        <p class="mb-1"><strong>Latest Weight:</strong> ${latest.weight||'—'}</p>
+                        <p class="mb-0"><strong>Latest BP / Sugar:</strong> ${latest.bp||'—'} / ${latest.sugarFasting||'—'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h6 class="text-warning fw-bold mb-2"><i class="fa-solid fa-history me-2"></i> Complete Visit History Timeline</h6>
+            <div class="history-box border border-secondary rounded-3 p-2">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-info">
+                            <th>Date</th>
+                            <th>Height/Weight</th>
+                            <th>BP</th>
+                            <th>Sugar</th>
+                            <th>Fees</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${visitsHistoryRows}
+                    </tbody>
+                </table>
+            </div>`;
+
+        const modalButtons = document.getElementById("modalActionButtons");
+        modalButtons.innerHTML = `
+            <button type="button" class="btn btn-success fw-bold px-3" onclick="quickNewAppointment('${latest.code}', '${latest.name}', '${latest.phone}', '${latest.age}', '${latest.gender}')">
+                <i class="fa-solid fa-calendar-plus me-1"></i> Direct New Appointment
+            </button>`;
+
+        const profileModal = new bootstrap.Modal(document.getElementById("patientProfileModal"));
+        profileModal.show();
+    };
+}
+
+function triggerModalEdit(visitId){
+    const modalEl = document.getElementById("patientProfileModal");
+    const modalObj = bootstrap.Modal.getInstance(modalEl);
+    if(modalObj) modalObj.hide();
+
+    document.getElementById("btn-tab-home").click();
+    editVisit(visitId);
+}
+
+function clearMonthlyData(){
+    const selectedDateStr = document.getElementById("systemDateInput").value || new Date().toISOString().split("T")[0];
+    const currentMonth = selectedDateStr.substring(0, 7);
+
+    if(!confirm(`Are you sure you want to delete all records for month (${currentMonth})?`)) {
+        return;
+    }
+
+    const tx = dbConn.transaction(STORE_VISITS, "readwrite");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+
+    req.onsuccess = () => {
+        const allVisits = req.result || [];
+        let deletedCount = 0;
+
+        allVisits.forEach(v => {
+            if(v.date && v.date.startsWith(currentMonth)){
+                store.delete(v.id);
+                deletedCount++;
+            }
+        });
+
+        tx.oncomplete = () => {
+            showToast(`Deleted ${deletedCount} entries for month (${currentMonth})`);
+            loadTodayEntries();
+            updateDashboardView();
+        };
+    };
+}
+
+async function editVisit(id){
+    const tx=dbConn.transaction(STORE_VISITS, "readonly");
+    const store=tx.objectStore(STORE_VISITS);
+    const req=store.get(id);
+    req.onsuccess=()=>{
+        const v=req.result;
+        if(!v) return;
+        document.getElementById("editVisitId").value=v.id;
+        document.getElementById("patientCode").value=v.code||'';
+        document.getElementById("name").value=v.name;
+        document.getElementById("phone").value=v.phone;
+        document.getElementById("age").value=v.age;
+        document.getElementById("gender").value=v.gender;
+        document.getElementById("height").value=v.height;
+        document.getElementById("weight").value=v.weight;
+        document.getElementById("bp").value=v.bp;
+        document.getElementById("sugarFasting").value=v.sugarFasting;
+        document.getElementById("fees").value=v.fees;
+
+        document.getElementById("editModeBadge").classList.remove("d-none");
+        document.getElementById("saveBtnText").innerText="Update Appointment Record";
+        window.scrollTo({top:0, behavior:"smooth"});
+    };
+}
+
+async function deleteVisit(id){
+    if(!confirm("Are you sure you want to delete this visit?")) return;
+    const tx=dbConn.transaction(STORE_VISITS, "readwrite");
+    const store=tx.objectStore(STORE_VISITS);
+    store.delete(id);
+    tx.oncomplete=()=>{
+        showToast("Record deleted");
+        loadTodayEntries();
+        updateDashboardView();
+    };
+}
+
+function executeGlobalSearch(){
+    const query=document.getElementById("globalSearchInput").value.trim().toLowerCase();
+    if(!query) return;
+    const tx=dbConn.transaction(STORE_VISITS, "readonly");
+    const store=tx.objectStore(STORE_VISITS);
+    const request=store.getAll();
+
+    request.onsuccess=()=>{
+        const visits=request.result.filter(v=>
+            (v.code && v.code.toLowerCase().includes(query)) ||
+            (v.phone && v.phone.toLowerCase().includes(query)) ||
+            (v.name && v.name.toLowerCase().includes(query))
+        );
+
+        if(visits.length===0){
+            showToast("No records found", "error");
+            document.getElementById("globalSearchResultContainer").classList.add("d-none");
+            document.getElementById("globalSearchPlaceholder").classList.remove("d-none");
+            return;
+        }
+
+        const latest=visits[visits.length-1];
+        document.getElementById("patientDetailsBox").innerHTML=`
+            <div>
+                <span class="badge bg-warning text-dark fs-6 me-2">${latest.code||'—'}</span>
+                <strong>Name:</strong> ${latest.name} | <strong>Phone:</strong> ${latest.phone}
+            </div>
+            <div>
+                <button class="btn btn-sm btn-outline-warning fw-bold me-2" onclick="viewPatientProfileByCode('${latest.code}')">View Profile</button>
+                <button class="btn btn-sm btn-success fw-bold" onclick="quickNewAppointment('${latest.code}', '${latest.name}', '${latest.phone}', '${latest.age}', '${latest.gender}')">+ New Appt</button>
+            </div>
+        `;
+
+        const tbody=document.getElementById("globalHistoryTableBody");
+        tbody.innerHTML="";
+        visits.reverse().forEach(v=>{
+            tbody.innerHTML+=`
+                <tr>
+                    <td>${v.date}</td>
+                    <td><span class="badge bg-warning text-dark">${v.code||'—'}</span></td>
+                    <td>${v.height||"—"} / ${v.weight||"—"}</td>
+                    <td>${v.bp||"—"}</td>
+                    <td>${v.sugarFasting||"—"}</td>
+                    <td>Rs. ${v.fees}</td>
+                    <td><button class="btn btn-sm btn-outline-info" onclick="editVisit(${v.id})">Edit</button></td>
+                </tr>`;
+        });
+
+        document.getElementById("globalSearchResultContainer").classList.remove("d-none");
+        document.getElementById("globalSearchPlaceholder").classList.add("d-none");
+    };
+}
+
+async function downloadFullDatabase() {
+    const tx = dbConn.transaction(STORE_VISITS, "readonly");
+    const store = tx.objectStore(STORE_VISITS);
+    const req = store.getAll();
+    
+    req.onsuccess = () => {
+        const data = {
+            version: "1.0",
+            exportDate: new Date().toISOString(),
+            records: req.result
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+        const dlAnchor = document.createElement("a");
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `SlimFit_Database_${new Date().toISOString().split("T")[0]}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast("Database file downloaded successfully!");
+    };
+}
+
+async function uploadFullDatabase(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if(!confirm("Are you sure you want to upload and merge this database file?")) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+        try {
+            const imported = JSON.parse(event.target.result);
+            const tx = dbConn.transaction(STORE_VISITS, "readwrite");
+            const store = tx.objectStore(STORE_VISITS);
+            
+            imported.records.forEach(item => {
+                delete item.id;
+                store.add(item);
+            });
+            
+            tx.oncomplete = () => {
+                showToast("Data imported successfully!");
+                loadTodayEntries();
+                updateDashboardView();
+            };
+        } catch (err) {
+            showToast("Invalid file format!", "error");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function printFilteredReportPDF(){
+    const period = document.getElementById("reportPeriodSelect").value;
+    const selectedDate = document.getElementById("systemDateInput").value || new Date().toISOString().split("T")[0];
+    
+    const periodTextMap = {
+        daily: "DAILY REPORT (" + selectedDate + ")",
+        weekly: "WEEKLY REPORT (LAST 7 DAYS)",
+        monthly: "MONTHLY REPORT (" + selectedDate.substring(0,7) + ")"
+    };
+
+    document.getElementById("reportPrintTitle").innerText = periodTextMap[period];
+    document.getElementById("reportPrintDate").innerText = selectedDate;
+
+    getFilteredVisits(period, (visits) => {
+        const tbody = document.getElementById("dailyReportTableBody");
+        tbody.innerHTML = "";
+        let totalRevenue = 0;
+
+        visits.forEach((v, idx) => {
+            totalRevenue += v.fees;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${idx+1}</td>
+                    <td>${v.date||"—"}</td>
+                    <td>${v.code||"—"}</td>
+                    <td><strong>${v.name}</strong></td>
+                    <td>${v.phone}</td>
+                    <td>${v.weight||"—"}</td>
+                    <td>${v.bp||"—"} / ${v.sugarFasting||"—"}</td>
+                    <td>Rs. ${v.fees}</td>
+                </tr>`;
+        });
+
+        document.getElementById("reportTotalPatients").innerText = visits.length;
+        document.getElementById("reportTotalRevenue").innerText = totalRevenue;
+        document.getElementById("reportAverageFee").innerText = visits.length > 0 ? Math.round(totalRevenue / visits.length) : 0;
+
+        document.body.className = "print-report";
+        window.print();
+        document.body.className = "";
+    });
+}
+</script>
+</body>
+</html>
